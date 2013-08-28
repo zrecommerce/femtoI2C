@@ -28,6 +28,18 @@
 
 #define DEBUG_GPIO true
 
+// After selecting the device address, select the pin(s) you want to access
+// using their addresses.
+
+#define IC_P0 (1)
+#define IC_P1 (2)
+#define IC_P2 (4)
+#define IC_P3 (8)
+#define IC_P4 (16)
+#define IC_P5 (32)
+#define IC_P6 (64)
+#define IC_P7 (128)
+
 byte LED_ADDRESS;
 int bits;
 
@@ -55,80 +67,17 @@ void loop() {
   LED_ADDRESS = gpio_scan();
   
   int bits;
-  int ledBits;
+  
+  // Since this chip drives pins "high", we need to mask out the pin(s) we 
+  // want to leave "high".
+  int allBits = IC_P0 + IC_P1 + IC_P2 + IC_P3 + IC_P4 + IC_P5 + IC_P6 + IC_P7;
+  
+  
+  // Only leave P4 and P6 "on". Don't forget the parenthesis! (Order of operations and whatnot.)
+  bits = allBits - (IC_P4 + IC_P6); 
 
-  for (byte i = 0; i < 16; i++) {
-#ifdef DEBUG_GPIO
-    Serial.print("AT index: ");
-    
-    Serial.print(i);
-    Serial.println("...");
-#endif
-    switch(i) {
-      case 15:
-        bits = 0x00f0;
-        break;
-      case 14:
-        bits = 0x01e0;
-        break;
-      case 13:
-        bits = 0x02d0;
-        break;
-      case 12:
-        bits = 0x03c0;
-        break;
-      case 11:
-        bits = 0x04b0;
-        break;
-      case 10:
-        bits = 0x05a0;
-        break;
-      case 9:
-        bits = 0x0690;
-        break;
-      case 8:
-        bits = 0x0780;
-        break;
-      case 7:
-        bits = 0x0870;
-        break;
-      case 6:
-        bits = 0x0960;
-        break;
-      case 5:
-        bits = 0x0a50;
-        break;
-      case 4:
-        bits = 0x0b40;
-        break;
-      case 3:
-        bits = 0x0c30;
-        break;
-      case 2:
-        bits = 0x0d20;
-        break;
-      case 1:
-        bits = 0x0e10;
-        break;
-      default:
-        bits = 0x0f00;
-        break;
-    }
-    //  mirror direction of bits for output display
-    ledBits = (
-      ((bits & 1) << 3) | ((bits & 2) << 1) |
-      ((bits & 4) >> 1) | ((bits & 8) >> 3)
-    );
-    
-#ifdef DEBUG_GPIO
-    Serial.println("BIN:");
-    Serial.println(bits, BIN);
-#endif
-    
-
-    gpio_write(LED_ADDRESS, bits);
-    delay(100);
-  }
+  gpio_write(LED_ADDRESS, bits);
+  delay(10);
   
   
 #ifdef DEBUG_GPIO
